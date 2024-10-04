@@ -1,0 +1,47 @@
+name: 'Build, deploy, & activate code'
+description: 'Performs build, deploy and activation of code in one job.'
+runs:
+  using: "composite"
+  steps: 
+    - name: Get set_env from cache
+      uses: actions/download-artifact@v3
+      with:
+        name: set_env #name of the artifact (not the actual file)
+        # path: optional but allows it to be placed in a subdirectory
+        
+    - name: Setup the environment variables
+      run: |
+        source set_env.sh
+        sed -i "s+{PWA_CLIENT_ID}+$PWA_CLIENT_ID+g" $PWA_CONFIG_PATH
+        sed -i "s+{MOBIFY_USERNAME}+$MOBIFY_USERNAME+g" $PWA_MOBIFY_PATH
+        sed -i "s+{MOBIFY_API_KEY}+$MOBIFY_API_KEY+g" $PWA_MOBIFY_PATH
+        sed -i "s+/default+/$PWA_ENV+g" app/amplience-api/index.ts
+        sed -i "s+/default+/$PWA_ENV+g" app/commerce-api/hooks/useCustomer.js
+        cat $PWA_CONFIG_PATH
+      shell: bash
+
+    - name: Install dependencies
+      run: npm ci
+      shell: bash
+
+    - name: Cache npm dependencies
+      id: cache-npm
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: '~/.npm'
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm list
+      shell: bash
+
+    - name: Build and push code
+      run: |
+        npm run push -- -m "$BUILD_NUMBER-$BRANCH" -t $PWA_ENV -c "$PWA_MOBIFY_PATH"
+      shell: bash

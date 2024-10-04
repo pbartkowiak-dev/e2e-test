@@ -1,0 +1,21 @@
+name: 'Headless Setup Environment'
+description: 'Sets up environment variables.'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        echo "export PWA_CLIENT_ID=${{ env.CLIENT_ID }}" >> set_env.sh
+        echo "export PWA_CONFIG_PATH=${{ env.PWA_CONFIG_PATH }}" >> set_env.sh
+        echo "export PWA_MOBIFY_PATH=${{ env.PWA_MOBIFY_PATH }}" >> set_env.sh
+        echo "export BUILD_NUMBER=${{ env.BUILD_NUMBER }}" >> set_env.sh
+        echo "export BRANCH=${{ env.BRANCH }}" >> set_env.sh
+        echo "export PWA_ENV=${{ env.PWA_ENV }}" >> set_env.sh
+        echo "export MOBIFY_USERNAME=${{ env.MOBIFY_USERNAME }}" >> set_env.sh
+        echo "export MOBIFY_API_KEY=${{ env.MOBIFY_API_KEY }}" >> set_env.sh
+      shell: bash
+
+    - name: Upload set_env Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: set_env
+        path: set_env.sh

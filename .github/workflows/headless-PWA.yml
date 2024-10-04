@@ -1,0 +1,49 @@
+name: Wizards PWA Code Deploy and Activate
+
+on:
+  workflow_dispatch:
+    inputs:
+        environment:
+            type: choice
+            description: 'Deployment environment'
+            options:
+              - 'bfst-001'
+              - 'development'
+              - 'staging'
+              - 'production'
+            required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    env:
+        BRANCH: ${{ github.ref_name }}
+        BUILD_NUMBER: build-${{ github.run_number }}
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        MOBIFY_API_KEY: ${{ secrets.MOBIFY_API_KEY }}
+        MOBIFY_USERNAME: ${{ vars.MOBIFY_USERNAME }}
+        PWA_CONFIG_PATH: ${{ vars.PWA_CONFIG_PATH }}
+        PWA_ENV: ${{ vars.PWA_ENV }}
+        PWA_MOBIFY_PATH: ${{ vars.PWA_MOBIFY_PATH }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+          node-version: 18.x
+          registry-url: https://npm.pkg.github.com/
+          scope: "@dndbeyond"
+          cache: npm
+
+    - name: Setup Environment
+      uses: ./.github/actions/headless-setup-env
+
+    - name: Run Playwright Tests
+      uses: ./.github/actions/playwright
+
+#    - name: Build, deploy, & activate code (single-step)
+#      if: ${{ success() }}  # Only run this step if previous steps were successful
+#      uses: ./.github/actions/headless-deploy-code

@@ -1,0 +1,11 @@
+name: 'Deploy Amplience Content Schemas & Content Types'
+description: 'Exports and imports Amplience content schemas and types.'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        npm install -g @amplience/dc-cli
+        echo "Source Hub: $SOURCE_HUB"
+        echo "Destination Hub: $DEST_HUB"
+        /bin/bash MigrateDC.sh --sourcehub $SOURCE_HUB --sourceclientid $SOURCE_CLIENT_ID --sourceclientsecret '${{ secrets.SOURCE_CLIENT_SECRET }}' --destinationhub $DEST_HUB --destinationclientid $DEST_CLIENT_ID --destinationclientsecret '${{ secrets.DEST_CLIENT_SECRET }}' --visualizationdomainfind $VIZ_DOMAIN_FIND --visualizationdomainreplace $VIZ_DOMAIN_REPLACE
+      shell: bash
