@@ -1,0 +1,20 @@
+{
+  "name": "e2e-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "e2e": "npx playwright test",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.2",
+    "@types/node": "^22.7.4",
+    "typescript": "^5.5.3"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}
